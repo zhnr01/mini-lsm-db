@@ -48,3 +48,35 @@ class MiniLSM:
 
         self.sstables.append(file)
         self.indexes.append(index)
+
+
+def search_sstable(file, sparse_index, key):
+
+    keys = sorted(sparse_index.keys())
+
+    start_key = None
+
+    for k in keys:
+        if k <= key:
+            start_key = k
+        else:
+            break
+
+    if start_key is None:
+        return None
+
+    offset = sparse_index[start_key]
+
+    with open(file) as f:
+
+        f.seek(offset)
+
+        for line in f:
+
+            k, v = line.strip().split(":")
+
+            if k == key:
+                return v
+
+            if k > key:
+                return None
